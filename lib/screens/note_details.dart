@@ -16,9 +16,9 @@ class _NoteDetailState extends State<NoteDetail> {
   
   _NoteDetailState(this.appBarTitle);
 
-  void moveToLastScreen(){
-    Navigator.pop(context);
-  }
+  // void moveToLastScreen(){
+  //   Navigator.pop(context);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +26,6 @@ class _NoteDetailState extends State<NoteDetail> {
     return Scaffold(
       appBar: AppBar(
         title : Text(appBarTitle),
-        leading: IconButton(
-          icon: Icon(
-            Icons.cancel
-          ),
-          onPressed: (){
-            moveToLastScreen();
-          },
-        ),
       ),
 
       body: Padding(
