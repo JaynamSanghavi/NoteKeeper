@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notekeeper/screens/note_details.dart';
 
 class NoteList extends StatefulWidget {
   NoteList({Key key}) : super(key: key);
@@ -10,6 +11,14 @@ class NoteList extends StatefulWidget {
 class _NoteListState extends State<NoteList> {
   
   int count = 1;
+
+  void navigateToDetail(String title){
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context){
+        return NoteDetail(title);
+      }
+    ));
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -20,7 +29,7 @@ class _NoteListState extends State<NoteList> {
        body: getNoteListView(),
        floatingActionButton: FloatingActionButton(
          onPressed: (){
-           print("add");
+           navigateToDetail("Add Notes");
          },
          child: Icon(
            Icons.add
@@ -52,7 +61,7 @@ class _NoteListState extends State<NoteList> {
             ),
 
             onTap: (){
-              print("HI");
+              navigateToDetail("Edit Notes");
             },
           ),
         );

@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
 
 class NoteDetail extends StatefulWidget {
-  NoteDetail({Key key}) : super(key: key);
-
+  String appBarTitle;
+  NoteDetail(this.appBarTitle,{Key key}) : super(key: key);
   @override
-  _NoteDetailState createState() => _NoteDetailState();
+  _NoteDetailState createState() => _NoteDetailState(this.appBarTitle);
 }
 
 class _NoteDetailState extends State<NoteDetail> {
   
+  String appBarTitle = "";
   static var _priorities = ['High','Low'];
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   
+  _NoteDetailState(this.appBarTitle);
+
+  void moveToLastScreen(){
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle ts = Theme.of(context).textTheme.subtitle1;
     return Scaffold(
       appBar: AppBar(
-        title : Text("Add Note")
+        title : Text(appBarTitle),
+        leading: IconButton(
+          icon: Icon(
+            Icons.cancel
+          ),
+          onPressed: (){
+            moveToLastScreen();
+          },
+        ),
       ),
 
       body: Padding(
