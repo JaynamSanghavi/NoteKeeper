@@ -1,28 +1,115 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:notekeeper/models/note.dart';
+import 'package:notekeeper/utils/DatabaseHelper.dart';
+import 'dart:async';
 
 class NoteDetail extends StatefulWidget {
   String appBarTitle;
-  NoteDetail(this.appBarTitle,{Key key}) : super(key: key);
+  Note note;
+  NoteDetail(this.note,this.appBarTitle,{Key key}) : super(key: key);
   @override
-  _NoteDetailState createState() => _NoteDetailState(this.appBarTitle);
+  _NoteDetailState createState() => _NoteDetailState(this.note,this.appBarTitle);
 }
 
 class _NoteDetailState extends State<NoteDetail> {
   
   String appBarTitle = "";
+  Note note;
   static var _priorities = ['High','Low'];
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  
-  _NoteDetailState(this.appBarTitle);
+  DatabaseHelper databaseHelper = DatabaseHelper();
+  _NoteDetailState(this.note,this.appBarTitle);
 
-  // void moveToLastScreen(){
-  //   Navigator.pop(context);
-  // }
+  void updatePriorityAsInt(String value) {
+    switch (value) {
+      case 'High':
+        note.priority = 1;
+        break;
+      case 'Low':
+        note.priority = 2;
+        break;
+    }
+  }
+
+  String updatePriorityAsString(int value) {
+    String priority;
+    switch (value) {
+      case 1:
+        priority = _priorities[0];
+        break;
+      case 2:
+        priority = _priorities[1];
+        break;
+    }
+    return priority;
+  }
+
+  void updateTitle() {
+    note.title = titleController.text;
+  }
+
+  void updateDescription() {
+    note.desc = descriptionController.text;
+  }
+
+  void save() async {
+    moveToLastScreen();
+    note.date =
+        DateFormat.yMMMd().format(DateTime.now()); // Sets the current date
+
+    int result;
+    if (note.id != null) {
+      // Update operation
+      result = await databaseHelper.update(note);
+    } else {
+      // Insert operation
+      result = await databaseHelper.insert(note);
+    }
+
+    if (result != 0) {
+      _showAlertDialog('Status', 'Note Saved successfully');
+    } else {
+      _showAlertDialog('Status', 'Error saving note, Please try again later');
+    }
+  }
+
+  void _showAlertDialog(String title, String message) {
+    AlertDialog alertDialog = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+    );
+    showDialog(context: context, builder: (context) => alertDialog);
+  }
+
+  void delete() async {
+    moveToLastScreen();
+    if (note.id == null) {
+      _showAlertDialog('Status', 'No note was deleted');
+      return;
+    } else {
+      int result = await databaseHelper.delete(note.id);
+      if (result != 0) {
+        _showAlertDialog('Status', 'Note Deleted Successfully');
+      } else {
+        _showAlertDialog('Status',
+            'Error occurred while deleting note, please try again later');
+      }
+    }
+  }
+
+
+  void moveToLastScreen(){
+    Navigator.pop(context,true);
+  }
 
   @override
   Widget build(BuildContext context) {
     TextStyle ts = Theme.of(context).textTheme.subtitle1;
+    titleController.text = note.title;
+    descriptionController.text = note.desc;
+
     return Scaffold(
       appBar: AppBar(
         title : Text(appBarTitle),
@@ -41,10 +128,10 @@ class _NoteDetailState extends State<NoteDetail> {
                   );
                 }).toList(),
                 style: ts,
-                value: 'Low',
+                value: updatePriorityAsString(note.priority),
                 onChanged: (valueSelectByUser){
                   setState(() {
-                    print(valueSelectByUser);
+                    updatePriorityAsInt(valueSelectByUser);
                   });
                 },
 
@@ -56,7 +143,7 @@ class _NoteDetailState extends State<NoteDetail> {
               child: TextField(
                 controller: titleController,
                 onChanged: (val){
-                  print(val);
+                  updateTitle();
                 },
                 decoration: InputDecoration(
                   labelText : 'Title',
@@ -72,7 +159,7 @@ class _NoteDetailState extends State<NoteDetail> {
               child: TextField(
                 controller: descriptionController,
                 onChanged: (val){
-                  print(val);
+                  updateDescription();
                 },
                 decoration: InputDecoration(
                   labelText : 'Description',
@@ -98,6 +185,7 @@ class _NoteDetailState extends State<NoteDetail> {
                       onPressed: (){
                         setState(() {
                           print("Save");
+                          save();
                         });
                       },
                     ),
@@ -115,6 +203,7 @@ class _NoteDetailState extends State<NoteDetail> {
                       onPressed: (){
                         setState(() {
                           print("Delete");
+                          delete();
                         });
                       },
                     ),

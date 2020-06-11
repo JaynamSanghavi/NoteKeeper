@@ -11,7 +11,7 @@ class DatabaseHelper{
   String noteTable = 'note_table';
   String colId = 'id';
   String colTitle = 'title';
-  String colDescription = 'description';
+  String colDescription = 'desc';
   String colDate = 'date';
   String colPriority = 'priority';
 
@@ -71,6 +71,25 @@ class DatabaseHelper{
     List<Map<String, dynamic>> list = await db.rawQuery('SELECT COUNT (*) from $noteTable');
     int result = Sqflite.firstIntValue(list);
     return result;
+  }
+
+  Future<List<Map<String, dynamic>>> getNoteMapList() async {
+    Database db = await this.database;
+    //var result = await db.rawQuery("SELECT * FROM $noteTable ORDER BY $colPriority ASC");
+    var result = await db.query(noteTable, orderBy: '$colPriority ASC'); // helper function easier than rawQuery method
+    return result;
+  }
+
+  Future<List<Note>> getNotesList() async {
+    List<Map<String, dynamic>> notesMapList = await getNoteMapList(); // Get 'Map List' from database.
+    int count = notesMapList.length; // Count the number of items in list.
+    List<Note> notesList = List<Note>();
+    
+    // For loop to create a 'Note list' from a 'Map list'
+    for(int i=0; i<count; i++) {
+      notesList.add(Note.fromMapObject(notesMapList[i])); 
+    }
+    return notesList;
   }
 
 
