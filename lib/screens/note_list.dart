@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notekeeper/screens/note_details.dart';
 import 'package:notekeeper/models/note.dart';
 import 'package:notekeeper/utils/DatabaseHelper.dart';
@@ -87,19 +90,25 @@ class _NoteListState extends State<NoteList> {
       _noteList = List<Note>();
       updateListView();
     }
-    return Scaffold(
-       appBar: AppBar(
-         title : Text("Notes")
-       ),
-       body: getNoteListView(),
-       floatingActionButton: FloatingActionButton(
-         onPressed: (){
-           navigateToDetail(Note('','',2),"Add Notes");
-         },
-         child: Icon(
-           Icons.add
-         ),
-       ),
+    return WillPopScope(
+      onWillPop: () async {
+        exit(0);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title : Text("Notes"),
+          automaticallyImplyLeading: false,
+        ),
+        body: getNoteListView(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            navigateToDetail(Note('','',2),"Add Notes");
+          },
+          child: Icon(
+            Icons.add
+          ),
+        ),
+      ),
     );
   }
 
