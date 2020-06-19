@@ -10,18 +10,50 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key key}) : super(key: key);
 
-  @override
+  static Future<Widget> checkBio() async {
+    final LocalAuthentication _localAuthentication = LocalAuthentication();
+    bool canCheckBiometrics;
+    try {
+      canCheckBiometrics = await _localAuthentication.canCheckBiometrics;
+    } on PlatformException catch (e) {
+      print(e);
+    }
+    if(canCheckBiometrics){
+      return Auth();
+    }else{
+      return NoteList();
+    }
+  }
+  
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Note Keeper",
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.purple
-      ),
-      home: Auth(),
-    );
+    return new Container(
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(16.0),
+      child: new FutureBuilder(
+        future: checkBio(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data!=null) {
+              return MaterialApp(
+                title: "Note Keeper",
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData(
+                  primarySwatch: Colors.purple
+                ),
+                home: snapshot.data,
+              );
+            } else {  
+              return new CircularProgressIndicator();
+            }
+          }else {  
+              return new CircularProgressIndicator();
+          }
+        }
+      )
+    );    
   }
 }
+
 
 class Auth extends StatefulWidget {
   Auth({Key key}) : super(key: key);
@@ -31,10 +63,14 @@ class Auth extends StatefulWidget {
 }
 
 class _AuthState extends State<Auth> {
-  final LocalAuthentication _localAuthentication = LocalAuthentication();
+  static final LocalAuthentication _localAuthentication = LocalAuthentication();
   String _authorizedOrNot = "Not Authorized";
 
-  Future<void> _authorizeNow() async {
+  _AuthState(){
+    authorizeNow();
+  }
+
+  Future<void> authorizeNow() async {
     bool isAuthorized = false;
     try {
       isAuthorized = await _localAuthentication.authenticateWithBiometrics(
@@ -45,7 +81,6 @@ class _AuthState extends State<Auth> {
     } on PlatformException catch (e) {
       print(e);
     }
-
     if (!mounted) return;
 
     setState(() {
@@ -61,19 +96,6 @@ class _AuthState extends State<Auth> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RaisedButton(
-              onPressed: _authorizeNow,
-              child: Text("Authorized to enter the application"),
-              color: Colors.red,
-              colorBrightness: Brightness.light,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
